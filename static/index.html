@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Scentscape — Perfume Explorer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="logo">
+        <span class="logo-mark">S</span>
+        <span class="logo-text">Scentscape</span>
+      </div>
+      <nav class="header-nav">
+        <button class="nav-link active" id="navExplore" onclick="showView('explore')">Explore</button>
+        <button class="nav-link" id="navMap" onclick="showView('map')">Fragrance Map</button>
+      </nav>
+      <div class="header-right">
+        <nav class="header-stats" id="headerStats">
+          <span class="stat-item"><span id="statPerfumes">—</span> fragrances</span>
+          <span class="stat-dot">·</span>
+          <span class="stat-item"><span id="statBrands">—</span> houses</span>
+          <span class="stat-dot">·</span>
+          <span class="stat-item"><span id="statNotes">—</span> notes</span>
+        </nav>
+        <button class="theme-toggle" id="themeToggle" title="Toggle theme">☽</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ── EXPLORE VIEW ───────────────────────────────────────────── -->
+  <div id="exploreView" class="page-view active">
+
+    <!-- Hero -->
+    <section class="hero">
+      <div class="hero-inner">
+        <p class="hero-eyebrow">Discover your signature</p>
+        <h1 class="hero-title">The Art of<br /><em>Fine Fragrance</em></h1>
+        <div class="search-wrap">
+          <input id="searchInput" class="search-input" type="text" placeholder="Search by name or house…" autocomplete="off" />
+          <span class="search-icon">⌕</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Filters -->
+    <div class="toolbar">
+      <!-- Row 1: select filters -->
+      <div class="toolbar-inner">
+        <div class="filter-group">
+          <label class="filter-label">House</label>
+          <select id="brandFilter" class="filter-select">
+            <option value="">All Houses</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label class="filter-label">Category</label>
+          <select id="categoryFilter" class="filter-select">
+            <option value="">All</option>
+            <option value="designer">Designer</option>
+            <option value="niche">Niche</option>
+            <option value="luxury">Luxury</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label class="filter-label">Gender</label>
+          <select id="genderFilter" class="filter-select">
+            <option value="">All</option>
+            <option value="women">Women</option>
+            <option value="men">Men</option>
+            <option value="unisex">Unisex</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label class="filter-label">Accord</label>
+          <select id="accordFilter" class="filter-select">
+            <option value="">All Accords</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label class="filter-label">Note</label>
+          <input id="noteFilter" class="filter-input" type="text" placeholder="e.g. Rose, Oud…" list="notesList" />
+          <datalist id="notesList"></datalist>
+        </div>
+        <div class="filter-group">
+          <label class="filter-label">Sort</label>
+          <select id="sortSelect" class="filter-select">
+            <option value="rating-desc">Rating ↓</option>
+            <option value="rating-asc">Rating ↑</option>
+            <option value="votes-desc">Most Voted</option>
+            <option value="name-asc">Name A–Z</option>
+            <option value="name-desc">Name Z–A</option>
+            <option value="year-desc">Newest</option>
+            <option value="year-asc">Oldest</option>
+          </select>
+        </div>
+        <button id="clearFilters" class="clear-btn" title="Clear all filters">Clear</button>
+      </div>
+      <!-- Row 2: chip filters -->
+      <div class="toolbar-chips-row">
+        <div class="chips-group">
+          <span class="chips-group-label">Season</span>
+          <button class="season-chip" data-season="spring">🌸 Spring</button>
+          <button class="season-chip" data-season="summer">☀️ Summer</button>
+          <button class="season-chip" data-season="fall">🍂 Fall</button>
+          <button class="season-chip" data-season="winter">❄️ Winter</button>
+        </div>
+        <div class="chips-group-sep"></div>
+        <div class="chips-group">
+          <span class="chips-group-label">Longevity</span>
+          <button class="filter-chip" data-filter="longevity" data-value="very_weak">💨 Very Weak</button>
+          <button class="filter-chip" data-filter="longevity" data-value="weak">🕐 Weak</button>
+          <button class="filter-chip" data-filter="longevity" data-value="moderate">⏱ Moderate</button>
+          <button class="filter-chip" data-filter="longevity" data-value="long_lasting">⌛ Long</button>
+          <button class="filter-chip" data-filter="longevity" data-value="eternal">♾ Eternal</button>
+        </div>
+        <div class="chips-group-sep"></div>
+        <div class="chips-group">
+          <span class="chips-group-label">Sillage</span>
+          <button class="filter-chip" data-filter="sillage" data-value="intimate">🫧 Intimate</button>
+          <button class="filter-chip" data-filter="sillage" data-value="moderate">〰 Moderate</button>
+          <button class="filter-chip" data-filter="sillage" data-value="strong">🌊 Strong</button>
+          <button class="filter-chip" data-filter="sillage" data-value="enormous">💥 Enormous</button>
+        </div>
+        <div class="chips-group-sep"></div>
+        <div class="chips-group">
+          <span class="chips-group-label">Price Value</span>
+          <button class="filter-chip" data-filter="price" data-value="way_overpriced">💸 Way Over</button>
+          <button class="filter-chip" data-filter="price" data-value="overpriced">😬 Overpriced</button>
+          <button class="filter-chip" data-filter="price" data-value="ok">👌 Ok</button>
+          <button class="filter-chip" data-filter="price" data-value="good_value">👍 Good</button>
+          <button class="filter-chip" data-filter="price" data-value="great_value">🤩 Great</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Results bar -->
+    <div class="results-bar">
+      <span id="resultsCount" class="results-text"></span>
+    </div>
+
+    <!-- Grid -->
+    <main class="grid-container">
+      <div class="perfume-grid" id="perfumeGrid"></div>
+      <div class="loading-spinner" id="loadingSpinner">
+        <div class="spinner"></div>
+      </div>
+      <div class="empty-state" id="emptyState" style="display:none">
+        <p class="empty-icon">◯</p>
+        <p class="empty-text">No fragrances found</p>
+        <p class="empty-sub">Try adjusting your filters</p>
+      </div>
+    </main>
+
+    <!-- Pagination -->
+    <div class="pagination" id="pagination"></div>
+
+  </div><!-- end exploreView -->
+
+  <!-- ── MAP VIEW ───────────────────────────────────────────────── -->
+  <div id="mapView" class="page-view">
+    <div class="map-header">
+      <h2 class="map-title">Fragrance Map</h2>
+      <p class="map-subtitle">Top-rated fragrances grouped by their dominant accord</p>
+    </div>
+    <div class="accord-grid" id="accordGrid">
+      <div class="loading-spinner" id="mapSpinner"><div class="spinner"></div></div>
+    </div>
+  </div>
+
+  <!-- Detail Modal -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal" id="modal">
+      <button class="modal-close" id="modalClose">✕</button>
+      <div class="modal-inner" id="modalInner"></div>
+    </div>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
