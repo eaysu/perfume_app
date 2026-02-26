@@ -460,7 +460,11 @@ function noteGroup(label, notes, type) {
     <div class="modal-notes-group">
       <div class="modal-section-title">${label}</div>
       <div class="modal-notes-row">
-        ${notes.map(n => `<span class="modal-note-tag ${type}">${esc(n)}</span>`).join('')}
+        ${notes.map(n => {
+          const noteSlug = n.replace(/ /g, '_');
+          const noteImgUrl = `/note_images/${noteSlug}.png`;
+          return `<span class="modal-note-tag ${type}" data-note-img="${noteImgUrl}">${esc(n)}</span>`;
+        }).join('')}
       </div>
     </div>`;
 }
@@ -752,7 +756,73 @@ function bindEvents() {
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape') closeModal();
   });
+
+  // Note tooltip
+  setupNoteTooltips();
 }
 
-/* ── Start ───────────────────────────────────────────────────────── */
+/* ── Note Tooltips ───────────────────────────────────────────────── */
+let noteTooltip = null;
+
+function setupNoteTooltips() {
+  // Create tooltip element
+  noteTooltip = document.createElement('div');
+  noteTooltip.className = 'note-tooltip';
+  document.body.appendChild(noteTooltip);
+
+  // Delegate hover events
+  document.addEventListener('mouseover', e => {
+    const tag = e.target.closest('.modal-note-tag[data-note-img]');
+    if (tag) showNoteTooltip(tag, e);
+  });
+
+  document.addEventListener('mouseout', e => {
+    const tag = e.target.closest('.modal-note-tag[data-note-img]');
+    if (tag) hideNoteTooltip();
+  });
+
+  document.addEventListener('mousemove', e => {
+    if (noteTooltip.classList.contains('show')) {
+      positionTooltip(e);
+    }
+  });
+}
+
+function showNoteTooltip(tag, e) {
+  const imgUrl = tag.getAttribute('data-note-img');
+  const noteName = tag.textContent.trim();
+  
+  noteTooltip.innerHTML = `
+    <img class="note-tooltip-img" src="${imgUrl}" alt="${noteName}" 
+         onerror="this.style.display='none'" />
+    <div class="note-tooltip-name">${noteName}</div>
+  `;
+  
+  positionTooltip(e);
+  setTimeout(() => noteTooltip.classList.add('show'), 10);
+}
+
+function hideNoteTooltip() {
+  noteTooltip.classList.remove('show');
+}
+
+function positionTooltip(e) {
+  const offset = 15;
+  let x = e.clientX + offset;
+  let y = e.clientY + offset;
+  
+  // Keep tooltip within viewport
+  const rect = noteTooltip.getBoundingClientRect();
+  if (x + rect.width > window.innerWidth) {
+    x = e.clientX - rect.width - offset;
+  }
+  if (y + rect.height > window.innerHeight) {
+    y = e.clientY - rect.height - offset;
+  }
+  
+  noteTooltip.style.left = x + 'px';
+  noteTooltip.style.top = y + 'px';
+}
+
+/* ── Start ───────────────────────────────────────────────── */
 init();

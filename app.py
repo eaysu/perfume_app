@@ -19,8 +19,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Serve perfume images
+# Serve perfume images and note images
 app.mount("/images", StaticFiles(directory="perfume_images"), name="images")
+app.mount("/note_images", StaticFiles(directory="perfume_notes"), name="note_images")
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 DATA_FILE = "fragrantica_perfumes.json"
