@@ -1025,17 +1025,96 @@ body {
 }
 
 /* ── Responsive ──────────────────────────────────────────────────── */
+
+/* Tablet (768px - 1024px) */
+@media (max-width: 1024px) {
+  .perfume-grid { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); }
+  .toolbar-chips-row { padding: 8px 24px; }
+  .chips-group { gap: 5px; }
+  .filter-chip, .season-chip { font-size: 10px; padding: 4px 8px; }
+}
+
+/* Mobile landscape / small tablet (max 768px) */
 @media (max-width: 768px) {
-  .modal-inner { grid-template-columns: 1fr; }
-  .modal-image-col { border-right: none; border-bottom: 1px solid var(--border); padding: 24px; }
-  .toolbar-inner { gap: 0; padding: 0 16px; }
-  .filter-group { padding: 0 12px; }
-  .hero { padding: 100px 16px 36px; }
+  .header-inner { padding: 0 16px; }
+  .header-stats { display: none; }
+  .header-nav { display: none; }
+  
+  .hero { padding: 80px 16px 32px; }
+  .hero-title { font-size: 48px; line-height: 1.1; }
+  .search-wrap { max-width: 100%; }
+  
+  .toolbar { position: relative; top: 0; }
+  .toolbar-inner { 
+    height: auto; 
+    padding: 12px 16px; 
+    flex-wrap: wrap; 
+    gap: 8px;
+  }
+  .filter-group { 
+    padding: 0; 
+    border-right: none; 
+    height: auto;
+    min-width: auto;
+  }
+  .filter-select, .filter-input { font-size: 12px; min-width: 60px; max-width: 110px; }
+  .clear-btn { margin-left: 0; width: 100%; margin-top: 4px; }
+  
+  .toolbar-chips-row { 
+    padding: 8px 16px; 
+    gap: 6px;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    scrollbar-width: none;
+  }
+  .toolbar-chips-row::-webkit-scrollbar { display: none; }
+  .chips-group-label { font-size: 8px; }
+  .chips-group-sep { display: none; }
+  
+  .results-bar { padding: 12px 16px 0; }
   .grid-container { padding: 16px 16px 48px; }
   .perfume-grid { grid-template-columns: repeat(auto-fill, minmax(155px, 1fr)); gap: 12px; }
-  .header-stats { display: none; }
-  .header-inner { padding: 0 16px; }
+  
+  .modal-inner { grid-template-columns: 1fr; }
+  .modal-image-col { 
+    border-right: none; 
+    border-bottom: 1px solid var(--border); 
+    padding: 24px; 
+  }
+  .modal-content { padding: 24px; }
+  .modal-title { font-size: 28px; }
+  
   #mapView { padding: 24px 16px 48px; }
+  .map-header h2 { font-size: 36px; }
   .accord-grid { grid-template-columns: 1fr; }
-  .header-nav { display: none; }
+}
+
+/* Mobile portrait (max 480px) */
+@media (max-width: 480px) {
+  .hero-title { font-size: 36px; }
+  .search-input { font-size: 14px; padding: 14px 20px 14px 44px; }
+  
+  .perfume-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .perfume-card { border-radius: 8px; }
+  .card-image { height: 140px; }
+  .card-title { font-size: 13px; }
+  .card-brand { font-size: 10px; }
+  .card-rating { font-size: 11px; }
+  
+  .filter-chip, .season-chip { font-size: 9px; padding: 3px 7px; }
+  
+  .modal-title { font-size: 24px; }
+  .modal-brand { font-size: 12px; }
+  .modal-rating { font-size: 13px; }
+  .note-tag { font-size: 10px; padding: 4px 8px; }
+  
+  .vote-icons-grid { gap: 12px; }
+  .vi-label { font-size: 9px; }
+  .vi-bar-label { font-size: 9px; }
+  .vi-wave-label { font-size: 9px; }
+  .vi-coin-label { font-size: 9px; }
+  .vi-season-name { font-size: 9px; }
+  
+  .pagination { gap: 6px; }
+  .page-btn { padding: 6px 10px; font-size: 11px; }
 }
