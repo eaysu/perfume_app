@@ -218,7 +218,7 @@ async function fetchAndRender() {
 function buildCard(p, index) {
   const card = document.createElement('div');
   card.className = 'perfume-card';
-  card.style.animationDelay = `${Math.min(index, 12) * 40}ms`;
+  card.style.animationDelay = `${Math.min(index, 15) * 60}ms`;
 
   const glow = getGlow(p);
   if (glow) card.setAttribute('data-glow', glow);
