@@ -79,70 +79,74 @@ async def get_perfumes(
 
     if price:
         price_key = price.lower()
-        PRICE_LEVELS = ['way_overpriced', 'overpriced', 'ok', 'good_value', 'great_value']
-        def price_ratio(p):
+        def get_dominant_price(p):
             pv = p.get('price_value')
-            if not pv or not isinstance(pv, dict): return 0
-            val = pv.get(price_key, 0)
-            total = sum(pv.values())
-            return val / total if total else 0
-        perfumes = [p for p in perfumes if price_ratio(p) > 0]
-        perfumes.sort(key=price_ratio, reverse=True)
+            if not pv or not isinstance(pv, dict): return None
+            return max(pv.items(), key=lambda x: x[1])[0] if pv else None
+        
+        perfumes = [p for p in perfumes if get_dominant_price(p) == price_key]
+        # Sort by vote count for this price level
+        perfumes.sort(key=lambda p: p.get('price_value', {}).get(price_key, 0), reverse=True)
 
     if longevity:
         lon_keys = [l.lower() for l in longevity]
-        def lon_ratio(p):
+        def get_dominant_longevity(p):
             lv = p.get('longevity')
-            if not lv or not isinstance(lv, dict): return 0
-            # AND logic: all selected longevity levels must have votes
-            if not all(lv.get(k, 0) > 0 for k in lon_keys):
-                return 0
-            val = sum(lv.get(k, 0) for k in lon_keys)
-            total = sum(lv.values())
-            return val / total if total else 0
-        perfumes = [p for p in perfumes if lon_ratio(p) > 0]
-        perfumes.sort(key=lon_ratio, reverse=True)
+            if not lv or not isinstance(lv, dict): return None
+            return max(lv.items(), key=lambda x: x[1])[0] if lv else None
+        
+        perfumes = [p for p in perfumes if get_dominant_longevity(p) in lon_keys]
+        # Sort by total votes for selected longevity levels
+        perfumes.sort(key=lambda p: sum(p.get('longevity', {}).get(k, 0) for k in lon_keys), reverse=True)
 
     if sillage:
         sil_keys = [s.lower() for s in sillage]
-        def sil_ratio(p):
+        def get_dominant_sillage(p):
             sv = p.get('sillage')
-            if not sv or not isinstance(sv, dict): return 0
-            # AND logic: all selected sillage levels must have votes
-            if not all(sv.get(k, 0) > 0 for k in sil_keys):
-                return 0
-            val = sum(sv.get(k, 0) for k in sil_keys)
-            total = sum(sv.values())
-            return val / total if total else 0
-        perfumes = [p for p in perfumes if sil_ratio(p) > 0]
-        perfumes.sort(key=sil_ratio, reverse=True)
+            if not sv or not isinstance(sv, dict): return None
+            return max(sv.items(), key=lambda x: x[1])[0] if sv else None
+        
+        perfumes = [p for p in perfumes if get_dominant_sillage(p) in sil_keys]
+        # Sort by total votes for selected sillage levels
+        perfumes.sort(key=lambda p: sum(p.get('sillage', {}).get(k, 0) for k in sil_keys), reverse=True)
 
     if season:
         season_keys = [s.lower() for s in season]
         SEASON_GROUP  = {'spring', 'summer', 'fall', 'winter'}
         DAYTIME_GROUP = {'day', 'night'}
 
-        def season_ratio(p):
+        def get_dominant_values(p):
             sv = p.get("season")
-            if not sv or not isinstance(sv, dict): return 0
-            # AND logic: all selected seasons must have votes
-            if not all(sv.get(k, 0) > 0 for k in season_keys):
-                return 0
-            val = sum(sv.get(k, 0) for k in season_keys)
-            if not val: return 0
-            # Normalize within the relevant group
-            season_vals = [k for k in season_keys if k in SEASON_GROUP]
-            daytime_vals = [k for k in season_keys if k in DAYTIME_GROUP]
-            if season_vals:
-                group_total = sum(sv.get(k, 0) for k in SEASON_GROUP)
-            elif daytime_vals:
-                group_total = sum(sv.get(k, 0) for k in DAYTIME_GROUP)
-            else:
-                group_total = sum(sv.values())
-            return val / group_total if group_total else 0
-
-        perfumes = [p for p in perfumes if season_ratio(p) > 0]
-        perfumes.sort(key=season_ratio, reverse=True)
+            if not sv or not isinstance(sv, dict): return {'seasons': [], 'daytime': []}
+            
+            # Separate season and daytime votes
+            season_votes = {k: v for k, v in sv.items() if k in SEASON_GROUP}
+            daytime_votes = {k: v for k, v in sv.items() if k in DAYTIME_GROUP}
+            
+            result = {'seasons': [], 'daytime': []}
+            
+            # Get dominant seasons (allow multiple if close in votes)
+            if season_votes:
+                sorted_seasons = sorted(season_votes.items(), key=lambda x: x[1], reverse=True)
+                top_votes = sorted_seasons[0][1]
+                threshold = top_votes * 0.65  # 65% threshold for multi-season perfumes
+                result['seasons'] = [s[0] for s in sorted_seasons if s[1] >= threshold]
+            
+            # Get dominant daytime (day/night) - both can be dominant
+            if daytime_votes:
+                # Include any daytime value with votes (day and night can both be dominant)
+                result['daytime'] = [k for k, v in daytime_votes.items() if v > 0]
+            
+            return result
+        
+        def matches_season_filter(p):
+            dominant = get_dominant_values(p)
+            all_dominant = dominant['seasons'] + dominant['daytime']
+            return any(s in all_dominant for s in season_keys)
+        
+        perfumes = [p for p in perfumes if matches_season_filter(p)]
+        # Sort by total votes for selected seasons
+        perfumes.sort(key=lambda p: sum(p.get('season', {}).get(k, 0) for k in season_keys), reverse=True)
 
     # Sort — always apply user's chosen sort, even after ratio-based filters
     reverse = order == "desc"
