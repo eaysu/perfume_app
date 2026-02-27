@@ -43,7 +43,7 @@ async def get_perfumes(
     gender: Optional[str] = Query(None),
     note: Optional[List[str]] = Query(None),
     season: Optional[List[str]] = Query(None),
-    accord: Optional[str] = Query(None),
+    accord: Optional[List[str]] = Query(None),
     price: Optional[str] = Query(None),
     longevity: Optional[List[str]] = Query(None),
     sillage: Optional[List[str]] = Query(None),
@@ -71,9 +71,10 @@ async def get_perfumes(
             for nn in (p.get("top_notes") or []) + (p.get("middle_notes") or []) + (p.get("base_notes") or [])
         )]
     if accord:
-        a = accord.lower()
+        accord_list = [a.lower() for a in accord]
         perfumes = [p for p in perfumes if any(
-            a in acc.lower() for acc in (p.get('main_accords') or [])
+            any(aq in acc.lower() for aq in accord_list)
+            for acc in (p.get('main_accords') or [])
         )]
 
     if price:
@@ -134,19 +135,18 @@ async def get_perfumes(
         perfumes = [p for p in perfumes if season_ratio(p) > 0]
         perfumes.sort(key=season_ratio, reverse=True)
 
-    # Sort — skip if a ratio-based filter already ordered results
-    if not season and not price and not longevity and not sillage:
-        reverse = order == "desc"
-        if sort == "rating":
-            perfumes.sort(key=lambda p: p.get("rating") or 0, reverse=reverse)
-        elif sort == "votes":
-            perfumes.sort(key=lambda p: p.get("votes") or 0, reverse=reverse)
-        elif sort == "name":
-            perfumes.sort(key=lambda p: p.get("name") or "", reverse=reverse)
-        elif sort == "brand":
-            perfumes.sort(key=lambda p: p.get("brand") or "", reverse=reverse)
-        elif sort == "year":
-            perfumes.sort(key=lambda p: p.get("release_year") or 0, reverse=reverse)
+    # Sort — always apply user's chosen sort, even after ratio-based filters
+    reverse = order == "desc"
+    if sort == "rating":
+        perfumes.sort(key=lambda p: p.get("rating") or 0, reverse=reverse)
+    elif sort == "votes":
+        perfumes.sort(key=lambda p: p.get("votes") or 0, reverse=reverse)
+    elif sort == "name":
+        perfumes.sort(key=lambda p: p.get("name") or "", reverse=reverse)
+    elif sort == "brand":
+        perfumes.sort(key=lambda p: p.get("brand") or "", reverse=reverse)
+    elif sort == "year":
+        perfumes.sort(key=lambda p: p.get("release_year") or 0, reverse=reverse)
 
     total = len(perfumes)
     start = (page - 1) * limit

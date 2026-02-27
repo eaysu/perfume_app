@@ -47,7 +47,7 @@ const state = {
   gender: '',
   notes: [],
   seasons: [],
-  accord: '',
+  accords: [],
   price: '',
   longevities: [],
   sillages: [],
@@ -142,29 +142,61 @@ async function loadBrands() {
   } catch (e) { /* silent */ }
 }
 
-/* ── Load accords dropdown ───────────────────────────────────────── */
+/* ── Load accords as chips ──────────────────────────────────────── */
 async function loadAccords() {
   try {
     const accords = await api('/api/accords');
-    const sel = document.getElementById('accordFilter');
-    accords.forEach(a => {
-      const opt = document.createElement('option');
-      opt.value = a.name;
-      opt.textContent = `${a.name} (${a.count})`;
-      sel.appendChild(opt);
+    const container = document.getElementById('accordChips');
+    accords.slice(0, 12).forEach(a => {
+      const chip = document.createElement('button');
+      chip.className = 'filter-chip';
+      chip.setAttribute('data-filter', 'accord');
+      chip.setAttribute('data-value', a.name);
+      chip.textContent = a.name;
+      chip.addEventListener('click', () => {
+        const idx = state.accords.indexOf(a.name);
+        if (idx > -1) {
+          state.accords.splice(idx, 1);
+          chip.classList.remove('active');
+        } else {
+          state.accords.push(a.name);
+          chip.classList.add('active');
+        }
+        state.page = 1;
+        fetchAndRender();
+      });
+      container.appendChild(chip);
     });
   } catch (e) { /* silent */ }
 }
 
-/* ── Load notes datalist ─────────────────────────────────────────── */
+/* ── Load notes as chips ────────────────────────────────────────── */
 async function loadNotes() {
   try {
     const notes = await api('/api/notes');
-    const dl = document.getElementById('notesList');
-    notes.forEach(n => {
-      const opt = document.createElement('option');
-      opt.value = n;
-      dl.appendChild(opt);
+    const container = document.getElementById('noteChips');
+    const popularNotes = ['Rose', 'Vanilla', 'Jasmine', 'Sandalwood', 'Bergamot', 'Patchouli', 'Musk', 'Amber', 'Oud', 'Lavender', 'Tonka Bean', 'Cedar'];
+    popularNotes.forEach(n => {
+      if (notes.includes(n)) {
+        const chip = document.createElement('button');
+        chip.className = 'filter-chip';
+        chip.setAttribute('data-filter', 'note');
+        chip.setAttribute('data-value', n);
+        chip.textContent = n;
+        chip.addEventListener('click', () => {
+          const idx = state.notes.indexOf(n);
+          if (idx > -1) {
+            state.notes.splice(idx, 1);
+            chip.classList.remove('active');
+          } else {
+            state.notes.push(n);
+            chip.classList.add('active');
+          }
+          state.page = 1;
+          fetchAndRender();
+        });
+        container.appendChild(chip);
+      }
     });
   } catch (e) { /* silent */ }
 }
@@ -187,7 +219,7 @@ async function fetchAndRender() {
   if (state.gender)    params.set('gender', state.gender);
   state.notes.forEach(n => params.append('note', n));
   state.seasons.forEach(s => params.append('season', s));
-  if (state.accord)    params.set('accord', state.accord);
+  state.accords.forEach(a => params.append('accord', a));
   if (state.price)     params.set('price', state.price);
   state.longevities.forEach(l => params.append('longevity', l));
   state.sillages.forEach(s => params.append('sillage', s));
@@ -666,15 +698,7 @@ function bindEvents() {
     fetchAndRender();
   });
 
-  document.getElementById('noteFilter').addEventListener('input', e => {
-    clearTimeout(state.debounceTimer);
-    state.debounceTimer = setTimeout(() => {
-      const val = e.target.value.trim();
-      state.notes = val ? val.split(',').map(n => n.trim()).filter(n => n) : [];
-      state.page = 1;
-      fetchAndRender();
-    }, 350);
-  });
+  // Note filter removed - now using chips
 
   document.getElementById('sortSelect').addEventListener('change', e => {
     const [sort, order] = e.target.value.split('-');
@@ -684,11 +708,7 @@ function bindEvents() {
     fetchAndRender();
   });
 
-  document.getElementById('accordFilter').addEventListener('change', e => {
-    state.accord = e.target.value;
-    state.page = 1;
-    fetchAndRender();
-  });
+  // Accord filter removed - now using chips in HTML
 
   // Season chips (multi-select)
   document.querySelectorAll('.season-chip').forEach(chip => {
@@ -754,7 +774,7 @@ function bindEvents() {
     state.gender = '';
     state.notes = [];
     state.seasons = [];
-    state.accord = '';
+    state.accords = [];
     state.price = '';
     state.longevities = [];
     state.sillages = [];
@@ -765,8 +785,8 @@ function bindEvents() {
     document.getElementById('brandFilter').value = '';
     document.getElementById('categoryFilter').value = '';
     document.getElementById('genderFilter').value = '';
-    document.getElementById('noteFilter').value = '';
-    document.getElementById('accordFilter').value = '';
+    // Note chips cleared via class removal below
+    // Accord chips cleared via class removal below
     document.getElementById('sortSelect').value = 'rating-desc';
     document.querySelectorAll('.season-chip, .filter-chip').forEach(c => c.classList.remove('active'));
     fetchAndRender();

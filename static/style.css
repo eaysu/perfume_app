@@ -296,17 +296,22 @@ body {
 .chips-group {
   display: flex;
   align-items: center;
-  gap: 6px;
-  flex-shrink: 0;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 .chips-group-label {
-  font-size: 10px;
-  letter-spacing: 0.1em;
+  font-size: 11px;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--text-3);
-  white-space: nowrap;
-  margin-right: 2px;
   font-weight: 500;
+  white-space: nowrap;
+}
+.chips-inline {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
 }
 .chips-group-sep {
   width: 1px;

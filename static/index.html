@@ -79,17 +79,6 @@
           </select>
         </div>
         <div class="filter-group">
-          <label class="filter-label">Accord</label>
-          <select id="accordFilter" class="filter-select">
-            <option value="">All Accords</option>
-          </select>
-        </div>
-        <div class="filter-group">
-          <label class="filter-label">Note</label>
-          <input id="noteFilter" class="filter-input" type="text" placeholder="Rose, Oud, Vanilla…" list="notesList" />
-          <datalist id="notesList"></datalist>
-        </div>
-        <div class="filter-group">
           <label class="filter-label">Sort</label>
           <select id="sortSelect" class="filter-select">
             <option value="rating-desc">Rating ↓</option>
@@ -105,6 +94,16 @@
       </div>
       <!-- Row 2: chip filters -->
       <div class="toolbar-chips-row">
+        <div class="chips-group">
+          <span class="chips-group-label">Accord</span>
+          <div id="accordChips" class="chips-inline"></div>
+        </div>
+        <div class="chips-group-sep"></div>
+        <div class="chips-group">
+          <span class="chips-group-label">Note</span>
+          <div id="noteChips" class="chips-inline"></div>
+        </div>
+        <div class="chips-group-sep"></div>
         <div class="chips-group">
           <span class="chips-group-label">Season</span>
           <button class="season-chip" data-season="spring">🌸 Spring</button>
