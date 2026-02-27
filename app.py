@@ -41,12 +41,12 @@ async def get_perfumes(
     brand: Optional[str] = Query(None),
     category: Optional[str] = Query(None),
     gender: Optional[str] = Query(None),
-    note: Optional[str] = Query(None),
-    season: Optional[str] = Query(None),
+    note: Optional[List[str]] = Query(None),
+    season: Optional[List[str]] = Query(None),
     accord: Optional[str] = Query(None),
     price: Optional[str] = Query(None),
-    longevity: Optional[str] = Query(None),
-    sillage: Optional[str] = Query(None),
+    longevity: Optional[List[str]] = Query(None),
+    sillage: Optional[List[str]] = Query(None),
     sort: str = Query("rating"),
     order: str = Query("desc"),
     page: int = Query(1, ge=1),
@@ -65,9 +65,9 @@ async def get_perfumes(
     if gender:
         perfumes = [p for p in perfumes if (p.get("gender") or "").lower() == gender.lower()]
     if note:
-        n = note.lower()
+        note_list = [n.lower() for n in note]
         perfumes = [p for p in perfumes if any(
-            n in (nn or "").lower()
+            any(nq in (nn or "").lower() for nq in note_list)
             for nn in (p.get("top_notes") or []) + (p.get("middle_notes") or []) + (p.get("base_notes") or [])
         )]
     if accord:
@@ -89,42 +89,46 @@ async def get_perfumes(
         perfumes.sort(key=price_ratio, reverse=True)
 
     if longevity:
-        lon_key = longevity.lower()
+        lon_keys = [l.lower() for l in longevity]
         def lon_ratio(p):
             lv = p.get('longevity')
             if not lv or not isinstance(lv, dict): return 0
-            val = lv.get(lon_key, 0)
+            val = sum(lv.get(k, 0) for k in lon_keys)
             total = sum(lv.values())
             return val / total if total else 0
         perfumes = [p for p in perfumes if lon_ratio(p) > 0]
         perfumes.sort(key=lon_ratio, reverse=True)
 
     if sillage:
-        sil_key = sillage.lower()
+        sil_keys = [s.lower() for s in sillage]
         def sil_ratio(p):
             sv = p.get('sillage')
             if not sv or not isinstance(sv, dict): return 0
-            val = sv.get(sil_key, 0)
+            val = sum(sv.get(k, 0) for k in sil_keys)
             total = sum(sv.values())
             return val / total if total else 0
         perfumes = [p for p in perfumes if sil_ratio(p) > 0]
         perfumes.sort(key=sil_ratio, reverse=True)
 
     if season:
-        s = season.lower()
+        season_keys = [s.lower() for s in season]
         SEASON_GROUP  = {'spring', 'summer', 'fall', 'winter'}
         DAYTIME_GROUP = {'day', 'night'}
 
         def season_ratio(p):
             sv = p.get("season")
             if not sv or not isinstance(sv, dict): return 0
-            val = sv.get(s, 0)
+            val = sum(sv.get(k, 0) for k in season_keys)
             if not val: return 0
             # Normalize within the relevant group
-            if s in SEASON_GROUP:
+            season_vals = [k for k in season_keys if k in SEASON_GROUP]
+            daytime_vals = [k for k in season_keys if k in DAYTIME_GROUP]
+            if season_vals:
                 group_total = sum(sv.get(k, 0) for k in SEASON_GROUP)
-            else:
+            elif daytime_vals:
                 group_total = sum(sv.get(k, 0) for k in DAYTIME_GROUP)
+            else:
+                group_total = sum(sv.values())
             return val / group_total if group_total else 0
 
         perfumes = [p for p in perfumes if season_ratio(p) > 0]

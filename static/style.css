@@ -538,6 +538,25 @@ body {
   font-weight: 400;
   border: 1px solid var(--border);
 }
+.card-gender {
+  position: absolute;
+  bottom: 16px;
+  right: 16px;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  background: rgba(255,255,255,0.8);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: none;
+  padding: 4px 10px;
+  border-radius: 100px;
+  font-weight: 500;
+}
+[data-theme="dark"] .card-gender {
+  background: rgba(22,22,21,0.8);
+}
 
 /* ── Loading ─────────────────────────────────────────────────────── */
 .loading-spinner {

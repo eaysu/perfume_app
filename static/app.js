@@ -45,12 +45,12 @@ const state = {
   brand: '',
   category: '',
   gender: '',
-  note: '',
-  season: '',
+  notes: [],
+  seasons: [],
   accord: '',
   price: '',
-  longevity: '',
-  sillage: '',
+  longevities: [],
+  sillages: [],
   sort: 'rating',
   order: 'desc',
   total: 0,
@@ -185,12 +185,12 @@ async function fetchAndRender() {
   if (state.brand)     params.set('brand', state.brand);
   if (state.category)  params.set('category', state.category);
   if (state.gender)    params.set('gender', state.gender);
-  if (state.note)      params.set('note', state.note);
-  if (state.season)    params.set('season', state.season);
+  state.notes.forEach(n => params.append('note', n));
+  state.seasons.forEach(s => params.append('season', s));
   if (state.accord)    params.set('accord', state.accord);
   if (state.price)     params.set('price', state.price);
-  if (state.longevity) params.set('longevity', state.longevity);
-  if (state.sillage)   params.set('sillage', state.sillage);
+  state.longevities.forEach(l => params.append('longevity', l));
+  state.sillages.forEach(s => params.append('sillage', s));
 
   try {
     const data = await api(`/api/perfumes?${params}`);
@@ -239,6 +239,7 @@ function buildCard(p, index) {
            onerror="this.style.opacity='0'" />
       ${p.category ? `<span class="card-category">${esc(p.category)}</span>` : ''}
       ${dotColor ? `<span class="card-accord-dot" style="background:${dotColor}" title="${(p.main_accords||[])[0]||''}"></span>` : ''}
+      ${p.gender ? `<span class="card-gender">${esc(p.gender)}</span>` : ''}
     </div>
     <div class="card-body">
       <div class="card-brand">${esc(p.brand || '')}</div>
@@ -668,7 +669,8 @@ function bindEvents() {
   document.getElementById('noteFilter').addEventListener('input', e => {
     clearTimeout(state.debounceTimer);
     state.debounceTimer = setTimeout(() => {
-      state.note = e.target.value.trim();
+      const val = e.target.value.trim();
+      state.notes = val ? val.split(',').map(n => n.trim()).filter(n => n) : [];
       state.page = 1;
       fetchAndRender();
     }, 350);
@@ -688,16 +690,16 @@ function bindEvents() {
     fetchAndRender();
   });
 
-  // Season chips
+  // Season chips (multi-select)
   document.querySelectorAll('.season-chip').forEach(chip => {
     chip.addEventListener('click', () => {
       const s = chip.getAttribute('data-season');
-      if (state.season === s) {
-        state.season = '';
+      const idx = state.seasons.indexOf(s);
+      if (idx > -1) {
+        state.seasons.splice(idx, 1);
         chip.classList.remove('active');
       } else {
-        state.season = s;
-        document.querySelectorAll('.season-chip').forEach(c => c.classList.remove('active'));
+        state.seasons.push(s);
         chip.classList.add('active');
       }
       state.page = 1;
@@ -705,19 +707,40 @@ function bindEvents() {
     });
   });
 
-  // Generic filter chips (longevity, sillage, price)
+  // Generic filter chips (longevity, sillage - multi-select, price - single)
   document.querySelectorAll('.filter-chip').forEach(chip => {
     chip.addEventListener('click', () => {
-      const filterKey = chip.getAttribute('data-filter'); // 'longevity' | 'sillage' | 'price'
+      const filterKey = chip.getAttribute('data-filter');
       const val = chip.getAttribute('data-value');
-      if (state[filterKey] === val) {
-        state[filterKey] = '';
-        chip.classList.remove('active');
-      } else {
-        state[filterKey] = val;
-        document.querySelectorAll(`.filter-chip[data-filter="${filterKey}"]`)
-          .forEach(c => c.classList.remove('active'));
-        chip.classList.add('active');
+      
+      if (filterKey === 'longevity') {
+        const idx = state.longevities.indexOf(val);
+        if (idx > -1) {
+          state.longevities.splice(idx, 1);
+          chip.classList.remove('active');
+        } else {
+          state.longevities.push(val);
+          chip.classList.add('active');
+        }
+      } else if (filterKey === 'sillage') {
+        const idx = state.sillages.indexOf(val);
+        if (idx > -1) {
+          state.sillages.splice(idx, 1);
+          chip.classList.remove('active');
+        } else {
+          state.sillages.push(val);
+          chip.classList.add('active');
+        }
+      } else if (filterKey === 'price') {
+        if (state.price === val) {
+          state.price = '';
+          chip.classList.remove('active');
+        } else {
+          state.price = val;
+          document.querySelectorAll('.filter-chip[data-filter="price"]')
+            .forEach(c => c.classList.remove('active'));
+          chip.classList.add('active');
+        }
       }
       state.page = 1;
       fetchAndRender();
@@ -729,12 +752,12 @@ function bindEvents() {
     state.brand = '';
     state.category = '';
     state.gender = '';
-    state.note = '';
-    state.season = '';
+    state.notes = [];
+    state.seasons = [];
     state.accord = '';
     state.price = '';
-    state.longevity = '';
-    state.sillage = '';
+    state.longevities = [];
+    state.sillages = [];
     state.sort = 'rating';
     state.order = 'desc';
     state.page = 1;
