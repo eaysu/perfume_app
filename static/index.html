@@ -92,16 +92,19 @@
         </div>
         <button id="clearFilters" class="clear-btn" title="Clear all filters">Clear</button>
       </div>
-      <!-- Row 2: chip filters -->
+      <!-- Row 2: note/accord search + chip filters -->
       <div class="toolbar-chips-row">
-        <div class="chips-group">
-          <span class="chips-group-label">Accord</span>
-          <div id="accordChips" class="chips-inline"></div>
+        <div class="filter-group" style="min-width: 200px;">
+          <label class="filter-label">Notes</label>
+          <input id="noteInput" class="filter-input" type="text" placeholder="Search notes..." list="notesList" autocomplete="off" />
+          <datalist id="notesList"></datalist>
+          <div id="selectedNotes" class="selected-chips"></div>
         </div>
-        <div class="chips-group-sep"></div>
-        <div class="chips-group">
-          <span class="chips-group-label">Note</span>
-          <div id="noteChips" class="chips-inline"></div>
+        <div class="filter-group" style="min-width: 200px;">
+          <label class="filter-label">Accords</label>
+          <input id="accordInput" class="filter-input" type="text" placeholder="Search accords..." list="accordsList" autocomplete="off" />
+          <datalist id="accordsList"></datalist>
+          <div id="selectedAccords" class="selected-chips"></div>
         </div>
         <div class="chips-group-sep"></div>
         <div class="chips-group">

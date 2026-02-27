@@ -313,6 +313,40 @@ body {
   gap: 6px;
   align-items: center;
 }
+.selected-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+  min-height: 0;
+}
+.selected-chip {
+  font-size: 11px;
+  padding: 5px 10px 5px 12px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 100px;
+  color: var(--text);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 400;
+}
+.selected-chip:hover {
+  background: var(--bg);
+  border-color: var(--text-3);
+}
+.selected-chip-remove {
+  font-size: 14px;
+  line-height: 1;
+  opacity: 0.5;
+  transition: opacity 0.2s ease;
+}
+.selected-chip:hover .selected-chip-remove {
+  opacity: 1;
+}
 .chips-group-sep {
   width: 1px;
   height: 18px;

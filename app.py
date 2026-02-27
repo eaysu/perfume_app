@@ -66,15 +66,15 @@ async def get_perfumes(
         perfumes = [p for p in perfumes if (p.get("gender") or "").lower() == gender.lower()]
     if note:
         note_list = [n.lower() for n in note]
-        perfumes = [p for p in perfumes if any(
-            any(nq in (nn or "").lower() for nq in note_list)
-            for nn in (p.get("top_notes") or []) + (p.get("middle_notes") or []) + (p.get("base_notes") or [])
+        perfumes = [p for p in perfumes if all(
+            any(nq in (nn or "").lower() for nn in (p.get("top_notes") or []) + (p.get("middle_notes") or []) + (p.get("base_notes") or []))
+            for nq in note_list
         )]
     if accord:
         accord_list = [a.lower() for a in accord]
-        perfumes = [p for p in perfumes if any(
-            any(aq in acc.lower() for aq in accord_list)
-            for acc in (p.get('main_accords') or [])
+        perfumes = [p for p in perfumes if all(
+            any(aq in acc.lower() for acc in (p.get('main_accords') or []))
+            for aq in accord_list
         )]
 
     if price:
@@ -94,6 +94,9 @@ async def get_perfumes(
         def lon_ratio(p):
             lv = p.get('longevity')
             if not lv or not isinstance(lv, dict): return 0
+            # AND logic: all selected longevity levels must have votes
+            if not all(lv.get(k, 0) > 0 for k in lon_keys):
+                return 0
             val = sum(lv.get(k, 0) for k in lon_keys)
             total = sum(lv.values())
             return val / total if total else 0
@@ -105,6 +108,9 @@ async def get_perfumes(
         def sil_ratio(p):
             sv = p.get('sillage')
             if not sv or not isinstance(sv, dict): return 0
+            # AND logic: all selected sillage levels must have votes
+            if not all(sv.get(k, 0) > 0 for k in sil_keys):
+                return 0
             val = sum(sv.get(k, 0) for k in sil_keys)
             total = sum(sv.values())
             return val / total if total else 0
@@ -119,6 +125,9 @@ async def get_perfumes(
         def season_ratio(p):
             sv = p.get("season")
             if not sv or not isinstance(sv, dict): return 0
+            # AND logic: all selected seasons must have votes
+            if not all(sv.get(k, 0) > 0 for k in season_keys):
+                return 0
             val = sum(sv.get(k, 0) for k in season_keys)
             if not val: return 0
             # Normalize within the relevant group

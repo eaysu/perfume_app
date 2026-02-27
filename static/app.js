@@ -142,61 +142,28 @@ async function loadBrands() {
   } catch (e) { /* silent */ }
 }
 
-/* ── Load accords as chips ──────────────────────────────────────── */
+/* ── Load accords datalist ──────────────────────────────────────── */
 async function loadAccords() {
   try {
     const accords = await api('/api/accords');
-    const container = document.getElementById('accordChips');
-    accords.slice(0, 12).forEach(a => {
-      const chip = document.createElement('button');
-      chip.className = 'filter-chip';
-      chip.setAttribute('data-filter', 'accord');
-      chip.setAttribute('data-value', a.name);
-      chip.textContent = a.name;
-      chip.addEventListener('click', () => {
-        const idx = state.accords.indexOf(a.name);
-        if (idx > -1) {
-          state.accords.splice(idx, 1);
-          chip.classList.remove('active');
-        } else {
-          state.accords.push(a.name);
-          chip.classList.add('active');
-        }
-        state.page = 1;
-        fetchAndRender();
-      });
-      container.appendChild(chip);
+    const dl = document.getElementById('accordsList');
+    accords.forEach(a => {
+      const opt = document.createElement('option');
+      opt.value = a.name;
+      dl.appendChild(opt);
     });
   } catch (e) { /* silent */ }
 }
 
-/* ── Load notes as chips ────────────────────────────────────────── */
+/* ── Load notes datalist ────────────────────────────────────────── */
 async function loadNotes() {
   try {
     const notes = await api('/api/notes');
-    const container = document.getElementById('noteChips');
-    const popularNotes = ['Rose', 'Vanilla', 'Jasmine', 'Sandalwood', 'Bergamot', 'Patchouli', 'Musk', 'Amber', 'Oud', 'Lavender', 'Tonka Bean', 'Cedar'];
-    popularNotes.forEach(n => {
-      if (notes.includes(n)) {
-        const chip = document.createElement('button');
-        chip.className = 'filter-chip';
-        chip.setAttribute('data-filter', 'note');
-        chip.setAttribute('data-value', n);
-        chip.textContent = n;
-        chip.addEventListener('click', () => {
-          const idx = state.notes.indexOf(n);
-          if (idx > -1) {
-            state.notes.splice(idx, 1);
-            chip.classList.remove('active');
-          } else {
-            state.notes.push(n);
-            chip.classList.add('active');
-          }
-          state.page = 1;
-          fetchAndRender();
-        });
-        container.appendChild(chip);
-      }
+    const dl = document.getElementById('notesList');
+    notes.forEach(n => {
+      const opt = document.createElement('option');
+      opt.value = n;
+      dl.appendChild(opt);
     });
   } catch (e) { /* silent */ }
 }
@@ -698,7 +665,33 @@ function bindEvents() {
     fetchAndRender();
   });
 
-  // Note filter removed - now using chips
+  // Note input with chips
+  const noteInput = document.getElementById('noteInput');
+  const selectedNotesContainer = document.getElementById('selectedNotes');
+  noteInput.addEventListener('change', e => {
+    const val = e.target.value.trim();
+    if (val && !state.notes.includes(val)) {
+      state.notes.push(val);
+      renderSelectedChips('notes');
+      state.page = 1;
+      fetchAndRender();
+    }
+    noteInput.value = '';
+  });
+
+  // Accord input with chips
+  const accordInput = document.getElementById('accordInput');
+  const selectedAccordsContainer = document.getElementById('selectedAccords');
+  accordInput.addEventListener('change', e => {
+    const val = e.target.value.trim();
+    if (val && !state.accords.includes(val)) {
+      state.accords.push(val);
+      renderSelectedChips('accords');
+      state.page = 1;
+      fetchAndRender();
+    }
+    accordInput.value = '';
+  });
 
   document.getElementById('sortSelect').addEventListener('change', e => {
     const [sort, order] = e.target.value.split('-');
@@ -785,8 +778,8 @@ function bindEvents() {
     document.getElementById('brandFilter').value = '';
     document.getElementById('categoryFilter').value = '';
     document.getElementById('genderFilter').value = '';
-    // Note chips cleared via class removal below
-    // Accord chips cleared via class removal below
+    renderSelectedChips('notes');
+    renderSelectedChips('accords');
     document.getElementById('sortSelect').value = 'rating-desc';
     document.querySelectorAll('.season-chip, .filter-chip').forEach(c => c.classList.remove('active'));
     fetchAndRender();
@@ -802,6 +795,34 @@ function bindEvents() {
 
   // Note tooltip
   setupNoteTooltips();
+}
+
+/* ── Render selected chips ───────────────────────────────────────── */
+function renderSelectedChips(type) {
+  const container = type === 'notes' 
+    ? document.getElementById('selectedNotes')
+    : document.getElementById('selectedAccords');
+  const items = type === 'notes' ? state.notes : state.accords;
+  
+  container.innerHTML = '';
+  items.forEach(item => {
+    const chip = document.createElement('div');
+    chip.className = 'selected-chip';
+    chip.innerHTML = `
+      <span>${esc(item)}</span>
+      <span class="selected-chip-remove">×</span>
+    `;
+    chip.addEventListener('click', () => {
+      const idx = items.indexOf(item);
+      if (idx > -1) {
+        items.splice(idx, 1);
+        renderSelectedChips(type);
+        state.page = 1;
+        fetchAndRender();
+      }
+    });
+    container.appendChild(chip);
+  });
 }
 
 /* ── Note Tooltips ───────────────────────────────────────────────── */
